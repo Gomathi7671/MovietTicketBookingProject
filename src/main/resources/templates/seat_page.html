@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Select Seats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .screen {
+            background: #ccc;
+            height: 40px;
+            margin: 20px auto;
+            width: 60%;
+            border-radius: 10px;
+            line-height: 40px;
+            font-weight: bold;
+            color: #333;
+        }
+        .seat-map {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+        }
+        .seat {
+            width: 40px;
+            height: 40px;
+            margin: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .available {
+            background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+            color: #222;
+        }
+        .available:hover {
+            background: #607D8B;
+            color: #fff;
+            transform: scale(1.12);
+            border-color: #2196F3;
+        }
+        .selected {
+            background: linear-gradient(135deg, #43a047, #66bb6a);
+            color: #fff;
+            border-color: #388e3c;
+        }
+        .booked {
+            background: linear-gradient(135deg, #e53935, #d32f2f);
+            color: #fff;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+        .legend {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+        }
+        .btn {
+            margin-top: 25px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background: #2196F3;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #1976D2;
+        }
+    </style>
+    <script>
+        function toggleSeat(seatId) {
+            let seat = document.getElementById("seat-" + seatId);
+            let chk = document.getElementById("chk-" + seatId);
+            if (seat.classList.contains("available")) {
+                seat.classList.remove("available");
+                seat.classList.add("selected");
+                chk.checked = true;
+            } else if (seat.classList.contains("selected")) {
+                seat.classList.remove("selected");
+                seat.classList.add("available");
+                chk.checked = false;
+            }
+        }
+    </script>
+</head>
+<body>
+
+<h2 th:text="${movie.title} + ' - Select Your Seats'"></h2>
+<div class="screen">SCREEN</div>
+
+<form action="/booking/confirm" method="post">
+    <input type="hidden" name="movieId" th:value="${movie.id}" />
+    <input type="hidden" name="showtimeId" th:value="${showtime.id}" />
+
+    <div class="seat-map">
+        <!-- Generate 15 rows (A–O) and 10 seats in each row -->
+        <div th:each="row,rowStat : ${#numbers.sequence(0,14)}" class="row">
+            <div th:each="col : ${#numbers.sequence(1,10)}"
+                 th:id="'seat-' + ${row*10 + col}"
+                 th:class="'seat available'"
+                 th:onclick="'toggleSeat(' + (${row*10 + col}) + ')' "
+                 th:text="${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.substring(row,row+1)} + ${col}">
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden checkboxes -->
+    <div style="display:none;">
+        <div th:each="row,rowStat : ${#numbers.sequence(0,14)}">
+            <div th:each="col : ${#numbers.sequence(1,10)}">
+                <input type="checkbox"
+                       th:id="'chk-' + ${row*10 + col}"
+                       name="seatIds"
+                       th:value="${row*10 + col}" />
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-box available"></div> Available</div>
+        <div class="legend-item"><div class="legend-box selected"></div> Selected</div>
+        <div class="legend-item"><div class="legend-box booked"></div> Booked</div>
+    </div>
+
+    <button type="submit" class="btn">Confirm Booking</button>
+</form>
+
+</body>
+</html>

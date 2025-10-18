@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Select Seats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .seats-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .seat {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .seat.selected {
+            background-color: #4CAF50; /* green */
+            color: white;
+        }
+
+        .seat.booked {
+            background-color: #E53935; /* red */
+            cursor: not-allowed;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 25px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h2 th:text="'Select Seats for ' + ${showtime.movie.title} + ' (' + ${showtime.theatreName} + ')'"></h2>
+
+
+<form id="seatForm" th:action="@{/booking/confirm}" method="post">
+    <input type="hidden" name="showtimeId" th:value="${showtime.id}"/>
+
+    <div class="seats-container" id="seatsContainer">
+        <div th:each="i : ${#numbers.sequence(1, 50)}"
+             th:class="'seat ' + (${bookedSeats.contains('S' + i)} ? 'booked' : '')"
+             th:text="'S' + ${i}"
+             th:data-seat="'S' + ${i}">
+        </div>
+    </div>
+
+    <input type="hidden" name="seatIds" id="selectedSeatsInput"/>
+    <button type="submit">Confirm Booking</button>
+</form>
+
+<script>
+    const seats = document.querySelectorAll('.seat:not(.booked)');
+    const selectedSeatsInput = document.getElementById('selectedSeatsInput');
+    const selectedSeats = new Set();
+
+    seats.forEach(seat => {
+        seat.addEventListener('click', () => {
+            const seatNumber = seat.getAttribute('data-seat');
+            if (selectedSeats.has(seatNumber)) {
+                selectedSeats.delete(seatNumber);
+                seat.classList.remove('selected');
+            } else {
+                selectedSeats.add(seatNumber);
+                seat.classList.add('selected');
+            }
+            selectedSeatsInput.value = Array.from(selectedSeats).join(',');
+        });
+    });
+
+    document.getElementById('seatForm').addEventListener('submit', e => {
+        if (selectedSeats.size === 0) {
+            e.preventDefault();
+            alert("Please select at least one seat!");
+        }
+    });
+</script>
+
+</body>
+</html>

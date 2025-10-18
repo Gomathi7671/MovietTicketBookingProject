@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Movies</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 20px; }
+    .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .movie-card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .movie-card img { width: 100%; border-radius: 12px; }
+    .movie-card h3 { margin: 10px 0 5px; color: #0077cc; }
+    .movie-card p { font-size: 14px; color: #555; }
+    .btn { display: inline-block; padding: 8px 12px; background: #0077cc; color: #fff; border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>Available Movies</h1>
+  <div class="movies-grid">
+    <div class="movie-card" th:each="movie : ${movies}">
+      <img th:src="${movie.posterUrl}" alt="Movie Poster">
+      <h3 th:text="${movie.title}"></h3>
+      <p th:text="${movie.description}"></p>
+      <p><strong>Genre:</strong> <span th:text="${movie.genre}"></span></p>
+      <p><strong>Duration:</strong> <span th:text="${movie.duration}"></span></p>
+      <p><strong>Rating:</strong> <span th:text="${movie.rating}"></span></p>
+      <p><strong>Release:</strong> <span th:text="${movie.releaseDate}"></span></p>
+      <a th:href="@{/movies/{id}(id=${movie.id})}" class="btn">View Details</a>
+    </div>
+  </div>
+</body>
+</html>

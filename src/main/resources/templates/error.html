@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <link rel="stylesheet" href="/error.css">
+</head>
+<body>
+<div class="card">
+    <h1> Error Occurred</h1>
+    <p th:text="${error}"></p>
+    <a href="/">Try Again</a>
+</div>
+</body>
+</html>

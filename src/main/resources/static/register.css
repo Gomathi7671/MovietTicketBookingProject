@@ -1,0 +1,105 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to right, #f39c12, #e67e22);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container */
+.register-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+/* Card */
+.register-card {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.register-card h2 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* Input Fields */
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #555;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #f39c12;
+    box-shadow: 0 0 5px rgba(243,156,18,0.5);
+    outline: none;
+}
+
+/* Button */
+.btn-register {
+    width: 100%;
+    padding: 12px;
+    background-color: #f39c12;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-register:hover {
+    background-color: #e67e22;
+}
+
+/* Login link */
+.login-link {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.login-link a {
+    color: #f39c12;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media(max-width: 480px){
+    .register-card {
+        padding: 30px 20px;
+    }
+}

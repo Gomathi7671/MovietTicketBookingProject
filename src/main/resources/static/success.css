@@ -1,0 +1,32 @@
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4fff4;
+            color: #2d6a4f;
+            text-align: center;
+            padding: 50px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1b4332;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2d6a4f;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        a:hover {
+            background: #40916c;
+        }
+    
