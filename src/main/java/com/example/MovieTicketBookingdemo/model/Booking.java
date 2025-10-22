@@ -32,6 +32,8 @@ public class Booking {
         this.showtime = showtime;
         this.seat = seat;
     }
+    
+    
 
     // ---------- Getters ----------
     public Long getId() {

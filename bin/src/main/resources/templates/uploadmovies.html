@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Movie</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/uploadmovies.css">
+</head>
+<body>
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2> Admin Panel</h2>
+      <ul>
+        <li><a href="/admin/uploadMovie" class="active">Upload Movie</a></li>
+        <li><a href="/admin/manageMovies">Manage Movies</a></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header>
+        <h1>Upload Movie</h1>
+        <p>Fill in the details below to add a new movie</p>
+      </header>
+
+      <section class="upload-form">
+        <form action="/admin/uploadMovie" method="POST" enctype="multipart/form-data">
+          
+          <!-- Title -->
+          <div class="form-group">
+            <label for="title">Movie Title</label>
+            <input type="text" id="title" name="title" required>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" required></textarea>
+          </div>
+
+          <!-- Cast -->
+          <div class="form-group">
+            <label for="cast">Cast</label>
+            <input type="text" id="cast" name="cast" required>
+          </div>
+
+          <!-- Duration -->
+          <div class="form-group">
+            <label for="duration">Duration</label>
+            <input type="text" id="duration" name="duration" required>
+          </div>
+
+          <!-- Rating -->
+          <div class="form-group">
+            <label for="rating">Rating</label>
+            <input type="number" step="0.1" min="0" max="10" id="rating" name="rating" required>
+          </div>
+
+          <!-- Release Date -->
+          <div class="form-group">
+            <label for="releaseDate">Release Date</label>
+            <input type="date" id="releaseDate" name="releaseDate" required>
+          </div>
+
+          <!-- Genre -->
+<div class="form-group">
+  <label for="genre">Genre</label>
+  <select id="genre" name="genre" required>
+    <option value="">-- Select Genre --</option>
+    <option value="Action">Action</option>
+    <option value="Comedy">Comedy</option>
+    <option value="Drama">Drama</option>
+    <option value="Horror">Horror</option>
+    <option value="Romance">Romance</option>
+    <option value="Sci-Fi">Sci-Fi</option>
+    <option value="Thriller">Thriller</option>
+  </select>
+</div>
+
+
+          <!-- Poster Upload -->
+          <div class="form-group">
+            <label for="poster">Movie Poster</label>
+            <input type="file" id="poster" name="poster" accept="image/*" required>
+          </div>
+
+          <button type="submit" class="btn">Upload Movie</button>
+        </form>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

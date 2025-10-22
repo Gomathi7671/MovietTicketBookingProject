@@ -71,29 +71,28 @@ public class AdminController {
         return "manage-movies"; // manage-movies.html
     }
 
-    // ✅ Step 4: Handle showtime scheduling
-   @PostMapping("/scheduleShow")
-public String scheduleShow(@ModelAttribute("showtimeRequest") CreateShowtimeRequest request, Model model) {
-    try {
-        Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(() -> new IllegalArgumentException("Movie not found"));
+    // ✅ Step 4: Handle showtime scheduling (no Lombok builder)
+    @PostMapping("/scheduleShow")
+    public String scheduleShow(@ModelAttribute("showtimeRequest") CreateShowtimeRequest request, Model model) {
+        try {
+            Movie movie = movieRepository.findById(request.getMovieId())
+                    .orElseThrow(() -> new IllegalArgumentException("Movie not found"));
 
-        Showtime showtime = Showtime.builder()
-                .movie(movie)
-                .showDate(request.getShowDate())
-                .showTime(request.getShowTime())
-                .theatreName(request.getTheatreName())
-                .city(request.getCity())
-                .cancellationAvailable(request.isCancellationAvailable())
-                .build();
+            Showtime showtime = new Showtime();
+            showtime.setMovie(movie);
+            showtime.setShowDate(request.getShowDate());
+            showtime.setShowTime(request.getShowTime());
+            showtime.setTheatreName(request.getTheatreName());
+            showtime.setCity(request.getCity());
+            showtime.setCancellationAvailable(request.isCancellationAvailable());
 
-        showtimeRepository.save(showtime);
+            showtimeRepository.save(showtime);
 
-        model.addAttribute("message", "Showtime added successfully!");
-        return "redirect:/admin/uploadMovie"; // success.html
-    } catch (Exception e) {
-        model.addAttribute("error", "Error while scheduling: " + e.getMessage());
-        return "redirect:/admin/uploadMovie"; // error.html
+            model.addAttribute("message", "Showtime added successfully!");
+            return "redirect:/admin/uploadMovie"; // success.html
+        } catch (Exception e) {
+            model.addAttribute("error", "Error while scheduling: " + e.getMessage());
+            return "redirect:/admin/uploadMovie"; // error.html
+        }
     }
-}
 }

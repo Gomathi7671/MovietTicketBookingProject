@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Manage Movies</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        /* Movie Table */
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        table th {
+            background: #3498db;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        table tr:hover {
+            background: #ecf0f1;
+        }
+
+        img {
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Form Styling */
+        form {
+            width: 60%;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        form input, form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        form input:focus, form select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 6px rgba(52,152,219,0.4);
+        }
+
+        /* Checkbox inline */
+        form input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        /* Submit Button */
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<h2>Manage Movies</h2>
+
+<!-- List Movies -->
+<h3>Available Movies</h3>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Genre</th>
+        <th>Duration</th>
+        <th>Poster</th>
+    </tr>
+    <tr th:each="movie : ${movies}">
+        <td th:text="${movie.title}"></td>
+        <td th:text="${movie.genre}"></td>
+        <td th:text="${movie.duration}"></td>
+        <td><img th:src="${movie.posterUrl}" alt="poster" width="100"/></td>
+    </tr>
+</table>
+
+<!-- Showtime Form -->
+<h3>Schedule Showtime</h3>
+<form th:action="@{/admin/scheduleShow}" method="post" th:object="${showtimeRequest}">
+    <label>Movie:</label>
+    <select th:field="*{movieId}">
+        <option th:each="m : ${movies}" th:value="${m.id}" th:text="${m.title}"></option>
+    </select>
+
+    <label>Show Date:</label>
+    <input type="date" th:field="*{showDate}" required/>
+
+    <label>Show Time:</label>
+    <input type="time" th:field="*{showTime}" required/>
+
+    <label>Theatre:</label>
+    <input type="text" th:field="*{theatreName}" required/>
+
+    <label>City:</label>
+    <input type="text" th:field="*{city}" required/>
+
+    <label>
+        <input type="checkbox" th:field="*{cancellationAvailable}"/> Cancellation Available
+    </label>
+
+    <button type="submit">Schedule Show</button>
+</form>
+
+</body>
+</html>

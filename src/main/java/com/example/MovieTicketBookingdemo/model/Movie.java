@@ -31,7 +31,8 @@ public class Movie {
 
     private LocalDate releaseDate;
 
-    private String posterUrl;  // Cloudinary URL
+    private String posterUrl;
+    // Cloudinary URL
 
     // Getters and Setters
 
