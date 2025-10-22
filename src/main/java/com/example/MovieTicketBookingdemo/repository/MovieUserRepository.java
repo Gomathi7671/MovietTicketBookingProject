@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MovieUserRepository extends JpaRepository<MovieUser, Long> {
 
-    // Find user by email
+    // Find a user by email
     MovieUser findByEmail(String email);
 
-    // Find user by username
-    MovieUser findByUsername(String username);   // <-- Add this line
+    // Find a user by username
+    MovieUser findByUsername(String username);
 }

@@ -6,6 +6,8 @@ import java.time.LocalTime;
 
 @Entity
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
