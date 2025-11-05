@@ -1,102 +1,160 @@
 package com.example.MovieTicketBookingdemo.controller;
 import com.example.MovieTicketBookingdemo.Controller.AdminController;
-
+import com.example.MovieTicketBookingdemo.dto.CreateShowtimeRequest;
+import com.example.MovieTicketBookingdemo.exception.MovieNotFoundException;
+import com.example.MovieTicketBookingdemo.exception.MovieUploadException;
+import com.example.MovieTicketBookingdemo.exception.ShowtimeCreationException;
 import com.example.MovieTicketBookingdemo.model.Movie;
+import com.example.MovieTicketBookingdemo.model.Showtime;
 import com.example.MovieTicketBookingdemo.repository.MovieRepository;
 import com.example.MovieTicketBookingdemo.repository.ShowtimeRepository;
 import com.example.MovieTicketBookingdemo.service.CloudinaryService;
 
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
+import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(AdminController.class)
-public class AdminControllerTest {
+class AdminControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @InjectMocks
+    private AdminController adminController;
 
-    @MockBean
+    @Mock
     private CloudinaryService cloudinaryService;
 
-    @MockBean
+    @Mock
     private MovieRepository movieRepository;
 
-    @MockBean
+    @Mock
     private ShowtimeRepository showtimeRepository;
 
-    // ✅ Test GET /admin/uploadMovie
-    @Test
-    void testShowUploadForm() throws Exception {
-        mockMvc.perform(get("/admin/uploadMovie"))
-                .andExpect(status().isOk());
+    @Mock
+    private Model model;
+
+    @Mock
+    private MultipartFile posterFile;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
-    // ✅ Test POST /admin/uploadMovie
+    // ✅ Test 1: Show Upload Form
     @Test
-    void testAddMovie() throws Exception {
-        MockMultipartFile poster = new MockMultipartFile(
-                "poster", "poster.jpg", MediaType.IMAGE_JPEG_VALUE, "dummy content".getBytes()
+    void testShowUploadForm() {
+        String viewName = adminController.showUploadForm(model);
+        assertEquals("uploadmovies", viewName);
+        verify(model, times(1)).addAttribute(eq("movie"), any(Movie.class));
+    }
+
+    // ✅ Test 2: Add Movie - Success
+    @Test
+    void testAddMovie_Success() throws Exception {
+        Movie movie = new Movie();
+        when(posterFile.isEmpty()).thenReturn(false);
+        when(cloudinaryService.uploadFile(posterFile)).thenReturn("https://cloudinary.com/fakeposter.jpg");
+
+        String result = adminController.addMovie(movie, posterFile);
+
+        assertEquals("redirect:/admin/uploadMovie", result);
+        verify(movieRepository).save(movie);
+        verify(cloudinaryService).uploadFile(posterFile);
+    }
+
+    // ✅ Test 3: Add Movie - Missing Poster
+    @Test
+    void testAddMovie_MissingPoster_ThrowsException() {
+        Movie movie = new Movie();
+        when(posterFile.isEmpty()).thenReturn(true);
+
+        MovieUploadException ex = assertThrows(
+                MovieUploadException.class,
+                () -> adminController.addMovie(movie, posterFile)
         );
-
-        when(cloudinaryService.uploadFile(any())).thenReturn("http://dummyurl.com/poster.jpg");
-        when(movieRepository.save(any(Movie.class))).thenReturn(new Movie());
-
-        mockMvc.perform(multipart("/admin/uploadMovie")
-                        .file(poster)
-                        .param("title", "Dummy Movie")
-                        .param("description", "Dummy Description")
-                        .param("genre", "Action")
-                        .param("duration", "120 min")
-                        .param("rating", "8.5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/admin/uploadMovie"));
+        assertEquals("Poster image is required!", ex.getMessage());
+        verifyNoInteractions(movieRepository);
     }
 
-    // ✅ Test GET /admin/manageMovies
+    // ✅ Test 4: Add Movie - Cloudinary Error
     @Test
-    void testManageMovies() throws Exception {
-        mockMvc.perform(get("/admin/manageMovies"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("movies"))
-                .andExpect(model().attributeExists("showtimeRequest"));
+    void testAddMovie_CloudinaryError_ThrowsException() throws Exception {
+        Movie movie = new Movie();
+        when(posterFile.isEmpty()).thenReturn(false);
+        when(cloudinaryService.uploadFile(posterFile)).thenThrow(new IOException("Upload failed"));
+
+        MovieUploadException ex = assertThrows(
+                MovieUploadException.class,
+                () -> adminController.addMovie(movie, posterFile)
+        );
+        assertTrue(ex.getMessage().contains("Error while storing movie"));
     }
 
-    // ✅ Test POST /admin/scheduleShow
+    // ✅ Test 5: Manage Movies - Success
     @Test
-    void testScheduleShow() throws Exception {
+    void testManageMovies() {
+        List<Movie> movies = List.of(new Movie(), new Movie());
+        when(movieRepository.findAll()).thenReturn(movies);
+
+        String result = adminController.manageMovies(model);
+
+        assertEquals("manage-movies", result);
+        verify(model).addAttribute("movies", movies);
+        verify(model).addAttribute(eq("showtimeRequest"), any(CreateShowtimeRequest.class));
+    }
+
+    // ✅ Test 6: Schedule Show - Success
+    @Test
+    void testScheduleShow_Success() {
+        CreateShowtimeRequest req = new CreateShowtimeRequest();
+        req.setMovieId(1L);
+        req.setCity("Chennai");
+        req.setTheatreName("PVR");
+        req.setShowDate(LocalDate.of(2025, 11, 10)); // ✅ LocalDate instead of String
+    req.setShowTime(LocalTime.of(18, 0));        // ✅ LocalTime instead of String
+
         Movie movie = new Movie();
         movie.setId(1L);
 
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
 
-        mockMvc.perform(post("/admin/scheduleShow")
-                        .param("movieId", "1")
-                        .param("showDate", LocalDate.now().toString())
-                        .param("showTime", LocalTime.now().toString())
-                        .param("theatreName", "ABC Theatre")
-                        .param("city", "Mumbai")
-                        .param("cancellationAvailable", "true"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/admin/uploadMovie"));
+        String result = adminController.scheduleShow(req);
+
+        assertEquals("redirect:/admin/manageMovies", result);
+        verify(showtimeRepository).save(any(Showtime.class));
+    }
+
+    // ✅ Test 7: Schedule Show - Movie Not Found
+    @Test
+    void testScheduleShow_MovieNotFound_ThrowsException() {
+        CreateShowtimeRequest req = new CreateShowtimeRequest();
+        req.setMovieId(99L);
+
+        when(movieRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(MovieNotFoundException.class, () -> adminController.scheduleShow(req));
+        verifyNoInteractions(showtimeRepository);
+    }
+
+    // ✅ Test 8: Schedule Show - Other Exception
+    @Test
+    void testScheduleShow_OtherException_ThrowsShowtimeCreationException() {
+        CreateShowtimeRequest req = new CreateShowtimeRequest();
+        req.setMovieId(1L);
+
+        when(movieRepository.findById(1L)).thenThrow(new RuntimeException("DB error"));
+
+        assertThrows(ShowtimeCreationException.class, () -> adminController.scheduleShow(req));
     }
 }

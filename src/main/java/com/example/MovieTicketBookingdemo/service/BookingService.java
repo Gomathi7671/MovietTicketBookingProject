@@ -66,5 +66,11 @@ public class BookingService {
             bookingRepository.save(booking);
         }
     }
+
+    // Add this at the bottom of the class, after existing methods
+public Booking getBookingById(Long id) {
+    return bookingRepository.findById(id).orElse(null);
+}
+
 }
 

@@ -1,6 +1,9 @@
 package com.example.MovieTicketBookingdemo.Controller;
 
 import com.example.MovieTicketBookingdemo.dto.CreateShowtimeRequest;
+import com.example.MovieTicketBookingdemo.exception.MovieNotFoundException;
+import com.example.MovieTicketBookingdemo.exception.MovieUploadException;
+import com.example.MovieTicketBookingdemo.exception.ShowtimeCreationException;
 import com.example.MovieTicketBookingdemo.model.Movie;
 import com.example.MovieTicketBookingdemo.model.Showtime;
 import com.example.MovieTicketBookingdemo.repository.MovieRepository;
@@ -12,11 +15,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -36,14 +35,18 @@ public class AdminController {
     @GetMapping("/uploadMovie")
     public String showUploadForm(Model model) {
         model.addAttribute("movie", new Movie());
-        return "uploadmovies"; // uploadmovies.html
+        return "uploadmovies";
     }
 
     // ✅ Step 2: Handle Form Submission and Save Movie
     @PostMapping("/uploadMovie")
     public String addMovie(@ModelAttribute Movie movie,
-                           @RequestParam("poster") MultipartFile posterFile,
-                           Model model) {
+                           @RequestParam("poster") MultipartFile posterFile) {
+
+        if (posterFile.isEmpty()) {
+            throw new MovieUploadException("Poster image is required!");
+        }
+
         try {
             // Upload poster to Cloudinary and get back URL
             String imageUrl = cloudinaryService.uploadFile(posterFile);
@@ -54,11 +57,9 @@ public class AdminController {
             // Save into DB
             movieRepository.save(movie);
 
-            model.addAttribute("message", "Movie added successfully!");
-            return "redirect:/admin/uploadMovie"; // success.html
+            return "redirect:/admin/uploadMovie";
         } catch (Exception e) {
-            model.addAttribute("error", "Error while storing movie: " + e.getMessage());
-            return "redirect:/admin/uploadMovie"; // error.html
+            throw new MovieUploadException("Error while storing movie: " + e.getMessage());
         }
     }
 
@@ -67,16 +68,16 @@ public class AdminController {
     public String manageMovies(Model model) {
         List<Movie> movies = movieRepository.findAll();
         model.addAttribute("movies", movies);
-        model.addAttribute("showtimeRequest", new CreateShowtimeRequest());
-        return "manage-movies"; // manage-movies.html
+        model.addAttribute("showtimeRequest", new com.example.MovieTicketBookingdemo.dto.CreateShowtimeRequest());
+        return "manage-movies";
     }
 
-    // ✅ Step 4: Handle showtime scheduling (no Lombok builder)
+    // ✅ Step 4: Handle showtime scheduling
     @PostMapping("/scheduleShow")
-    public String scheduleShow(@ModelAttribute("showtimeRequest") CreateShowtimeRequest request, Model model) {
+    public String scheduleShow(@ModelAttribute("showtimeRequest") CreateShowtimeRequest request) {
         try {
             Movie movie = movieRepository.findById(request.getMovieId())
-                    .orElseThrow(() -> new IllegalArgumentException("Movie not found"));
+                    .orElseThrow(() -> new MovieNotFoundException("Movie not found with ID: " + request.getMovieId()));
 
             Showtime showtime = new Showtime();
             showtime.setMovie(movie);
@@ -88,11 +89,11 @@ public class AdminController {
 
             showtimeRepository.save(showtime);
 
-            model.addAttribute("message", "Showtime added successfully!");
-            return "redirect:/admin/uploadMovie"; // success.html
+            return "redirect:/admin/manageMovies";
+        } catch (MovieNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            model.addAttribute("error", "Error while scheduling: " + e.getMessage());
-            return "redirect:/admin/uploadMovie"; // error.html
+            throw new ShowtimeCreationException("Error while scheduling show: " + e.getMessage());
         }
     }
 }

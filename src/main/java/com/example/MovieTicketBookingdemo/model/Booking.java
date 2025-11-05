@@ -1,6 +1,7 @@
 package com.example.MovieTicketBookingdemo.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 public class Booking {
@@ -21,6 +22,10 @@ public class Booking {
     @ManyToOne
     private Seat seat;
 
+    // Only used for testing (not stored in DB)
+    @Transient
+    private List<Seat> seats;
+
     // ---------- Constructors ----------
     public Booking() {}
 
@@ -32,8 +37,6 @@ public class Booking {
         this.showtime = showtime;
         this.seat = seat;
     }
-    
-    
 
     // ---------- Getters ----------
     public Long getId() {
@@ -60,9 +63,17 @@ public class Booking {
         return seat;
     }
 
+    public List<Seat> getSeats() {
+        return seats;
+    }
+
     // ---------- Setters ----------
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setBookingId(Long id) {
+        this.id = id; // alias for compatibility with tests
     }
 
     public void setEmail(String email) {
@@ -83,5 +94,9 @@ public class Booking {
 
     public void setSeat(Seat seat) {
         this.seat = seat;
+    }
+
+    public void setSeats(List<Seat> seats) {
+        this.seats = seats;
     }
 }

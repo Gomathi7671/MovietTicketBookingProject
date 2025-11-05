@@ -1,5 +1,5 @@
 package com.example.MovieTicketBookingdemo.model;
-
+  import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,7 +15,11 @@ public class Showtime {
     private String theatreName;
     private String city;
     private LocalDate showDate;
-    private LocalTime showTime;
+  
+
+@JsonFormat(pattern = "hh:mm a")
+private LocalTime showTime;
+
     private boolean cancellationAvailable;
 
     @ManyToOne
